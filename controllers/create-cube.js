@@ -1,4 +1,4 @@
 const Cube = require('../models/cube.js');
 
-const a = new Cube('Second Cube', 'even better', '', 5);
+const a = new Cube('Third Cube', 'niceee cubeee', '', 2);
 a.save();
