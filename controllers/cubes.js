@@ -8,9 +8,24 @@ const getAllCubes = async () => {
 const getCube = async (id) => {
     const cube = await Cube.findById(id).lean();
     return cube;
-}
+};
+
+const updateCube = async (cubeId, acsId) => {
+    await Cube.findByIdAndUpdate(cubeId, {
+        $addToSet: {
+            accessories: [acsId]
+        }
+    })
+};
+
+const getCubeWithAccessories = async (id) => {
+    const cube = Cube.findById(id).populate('accessories').lean();
+    return cube;
+};
 
 module.exports = {
     getAllCubes,
-    getCube
-}
+    getCube,
+    updateCube,
+    getCubeWithAccessories
+};

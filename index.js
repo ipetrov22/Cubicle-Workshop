@@ -15,6 +15,7 @@ mongoose.connect(config.dbUrl, {
     }
     console.log('Database is setup.');
 });
+mongoose.set('useFindAndModify', false);
 
 require('./config/express')(app);
 

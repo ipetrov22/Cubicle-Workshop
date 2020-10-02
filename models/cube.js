@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const urlValidator = require('../utils/urlValidator');
 
 const CubeSchema = new mongoose.Schema({
     name: {
@@ -25,5 +26,7 @@ const CubeSchema = new mongoose.Schema({
         ref: 'Accessory'
     }]
 });
+
+CubeSchema.path('imageUrl').validate(urlValidator, 'Image URL is invalid!');
 
 module.exports = mongoose.model('Cube', CubeSchema);
