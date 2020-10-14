@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const Cube = require('../models/cube');
 const jwt = require('jsonwebtoken');
-const { getCubeWithAccessories, getCube } = require('../controllers/cubes');
+const { getCubeWithAccessories, getCube, editCube, deleteCube } = require('../controllers/cubes');
 const { authAccess, checkLoggedIn, checkIsCreator } = require('../controllers/user');
 
 const router = Router();
@@ -74,6 +74,25 @@ router.get('/delete/cube/:id', authAccess, checkLoggedIn, checkIsCreator, async 
         title: 'Delete Cube Page',
         isLoggedIn: req.isLoggedIn
     });
+})
+
+router.post('/edit/cube/:id', authAccess, checkIsCreator, async (req, res) => {
+    const cube = await getCube(req.params.id);
+
+    const {
+        name,
+        description,
+        imageUrl,
+        difficulty
+    } = req.body;
+
+    await editCube(req.params.id, {...cube, name, description, imageUrl, difficulty});
+    res.redirect(`/details/${req.params.id}`);
+});
+
+router.post('/delete/cube/:id', authAccess, checkIsCreator, async (req, res) => {
+    await deleteCube(req.params.id);
+    res.redirect('/');
 })
 
 module.exports = router;
