@@ -1,13 +1,14 @@
 const { Router } = require("express");
 const { saveUser, verifyUser } = require('../controllers/user');
+const { authAccess, guestAccess } = require('../controllers/user');
 
 const router = Router();
 
-router.get('/login', (req, res) => {
+router.get('/login', guestAccess, (req, res) => {
     res.render('loginPage', { title: 'Login Page' });
 })
 
-router.get('/register', (req, res) => {
+router.get('/register', guestAccess, (req, res) => {
     res.render('registerPage', { title: 'Register Page' });
 })
 
@@ -33,7 +34,7 @@ router.post('/register', async (req, res) => {
     res.redirect('/register');
 })
 
-router.get('/logout', (req, res) => {
+router.get('/logout', authAccess, (req, res) => {
     res.clearCookie('aid');
     res.redirect('/');
 })

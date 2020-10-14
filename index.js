@@ -8,6 +8,7 @@ const indexRouter = require('./routes/index');
 const cubeRouter = require('./routes/cube');
 const accessoryRouter = require('./routes/accessory');
 const authRouter = require('./routes/auth');
+const { checkLoggedIn } = require('./controllers/user');
 const app = express();
 
 mongoose.connect(config.dbUrl, {
@@ -28,8 +29,11 @@ app.use('/', cubeRouter);
 app.use('/', accessoryRouter);
 app.use('/', authRouter);
 
-app.get('*', (req, res) => {
-    res.render('404', { title: 'Page Not Found' });
+app.get('*', checkLoggedIn, (req, res) => {
+    res.render('404', {
+        title: 'Page Not Found',
+        isLoggedIn: req.isLoggedIn
+    });
 })
 
 
