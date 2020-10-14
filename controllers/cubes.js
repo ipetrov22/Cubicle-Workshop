@@ -19,7 +19,7 @@ const updateCube = async (cubeId, acsId) => {
 };
 
 const getCubeWithAccessories = async (id) => {
-    const cube = Cube.findById(id).populate('accessories').lean();
+    const cube = await Cube.findById(id).populate('accessories').lean();
     return cube;
 };
 

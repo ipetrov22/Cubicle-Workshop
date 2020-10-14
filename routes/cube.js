@@ -1,8 +1,8 @@
 const { Router } = require("express");
 const Cube = require('../models/cube');
 const jwt = require('jsonwebtoken');
-const { getCubeWithAccessories } = require('../controllers/cubes');
-const { authAccess, checkLoggedIn, authAccessJSON } = require('../controllers/user');
+const { getCubeWithAccessories, getCube } = require('../controllers/cubes');
+const { authAccess, checkLoggedIn, checkIsCreator } = require('../controllers/user');
 
 const router = Router();
 
@@ -37,6 +37,20 @@ router.post('/create/cube', authAccess, async (req, res) => {
 
 router.get('/details/:id', checkLoggedIn, async (req, res) => {
     const cube = await getCubeWithAccessories(req.params.id);
+    try {
+        const token = req.cookies['aid'];
+        const decodedObj = jwt.verify(token, process.env.PRIVATE_KEY);
+
+        if (cube.creatorId.toString() === decodedObj.userId.toString()) {
+            cube.isCreator = true;
+        } else {
+            cube.isCreator = false;
+        }
+
+    } catch (error) {
+        cube.isCreator = false;
+    }
+
     res.render('details', {
         ...cube,
         title: 'Cube Details',
@@ -44,15 +58,19 @@ router.get('/details/:id', checkLoggedIn, async (req, res) => {
     });
 })
 
-router.get('/edit', authAccess, checkLoggedIn, (req, res) => {
+router.get('/edit/cube/:id', authAccess, checkLoggedIn, checkIsCreator, async (req, res) => {
+    const cube = await getCube(req.params.id);
     res.render('editCubePage', {
+        ...cube,
         title: 'Edit Cube Page',
         isLoggedIn: req.isLoggedIn
     });
 })
 
-router.get('/delete', authAccess, checkLoggedIn, (req, res) => {
+router.get('/delete/cube/:id', authAccess, checkLoggedIn, checkIsCreator, async (req, res) => {
+    const cube = await getCube(req.params.id);
     res.render('deleteCubePage', {
+        ...cube,
         title: 'Delete Cube Page',
         isLoggedIn: req.isLoggedIn
     });

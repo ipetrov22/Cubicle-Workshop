@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { getCube } = require('./cubes');
 
 const generateToken = (data) => {
     return jwt.sign(data, process.env.PRIVATE_KEY);
@@ -44,19 +44,24 @@ const verifyUser = async (req, res) => {
         password
     } = req.body;
 
-    const userObject = await User.findOne({ username });
-    const status = await bcrypt.compare(password, userObject.password);
-
-    if (status) {
-        const token = generateToken({
-            userId: userObject._id,
-            username: userObject.username
-        });
-
-        res.cookie('aid', token);
+    try {
+        const userObject = await User.findOne({ username });
+        const status = await bcrypt.compare(password, userObject.password);
+    
+        if (status) {
+            const token = generateToken({
+                userId: userObject._id,
+                username: userObject.username
+            });
+    
+            res.cookie('aid', token);
+        }
+    
+        return status;
+        
+    } catch (error) {
+        return false;
     }
-
-    return status;
 };
 
 const authAccess = (req, res, next) => {
@@ -98,7 +103,24 @@ const checkLoggedIn = (req, res, next) => {
         req.isLoggedIn = false;
     }
     next();
-}
+};
+
+const checkIsCreator = async (req, res, next) => {
+    const cube = await getCube(req.params.id);
+    try {
+        const token = req.cookies['aid'];
+        const decodedObj = jwt.verify(token, process.env.PRIVATE_KEY);
+
+        if (cube.creatorId.toString() === decodedObj.userId.toString()) {
+            next();
+        } else {
+            throw ('User is not creator.');
+        }
+
+    } catch (error) {
+        res.redirect('/');
+    }
+};
 
 module.exports = {
     saveUser,
@@ -106,5 +128,6 @@ module.exports = {
     authAccess,
     authAccessJSON,
     guestAccess,
-    checkLoggedIn
+    checkLoggedIn,
+    checkIsCreator
 };
