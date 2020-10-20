@@ -5,7 +5,8 @@ const { authAccess, guestAccess } = require('../controllers/user');
 const router = Router();
 
 router.get('/login', guestAccess, (req, res) => {
-    res.render('loginPage', { title: 'Login Page' });
+    const error = req.query.error;
+    res.render('loginPage', { title: 'Login Page', error });
 })
 
 router.get('/register', guestAccess, (req, res) => {
@@ -16,12 +17,12 @@ router.get('/register', guestAccess, (req, res) => {
 router.post('/login', async (req, res) => {
     const status = await verifyUser(req, res);
 
-    if (status) {
+    if (status === true) {
         res.redirect('/');
         return;
     }
 
-    res.redirect('/login');
+    res.redirect(`/login?error=${status}`);
 })
 
 router.post('/register', async (req, res) => {

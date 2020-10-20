@@ -73,7 +73,7 @@ const verifyUser = async (req, res) => {
         return status;
 
     } catch (error) {
-        return false;
+        return 'Invalid username or password.';
     }
 };
 
