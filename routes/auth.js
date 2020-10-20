@@ -9,7 +9,8 @@ router.get('/login', guestAccess, (req, res) => {
 })
 
 router.get('/register', guestAccess, (req, res) => {
-    res.render('registerPage', { title: 'Register Page' });
+    const error = req.query.error;
+    res.render('registerPage', { title: 'Register Page', error });
 })
 
 router.post('/login', async (req, res) => {
@@ -26,12 +27,12 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
     const status = await saveUser(req, res);
 
-    if (status) {
+    if (status === true) {
         res.redirect('/');
         return;
     }
 
-    res.redirect('/register');
+    res.redirect(`/register?error=${status}`);
 })
 
 router.get('/logout', authAccess, (req, res) => {

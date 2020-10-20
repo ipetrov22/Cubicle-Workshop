@@ -21,21 +21,34 @@ const saveUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPass = await bcrypt.hash(password, salt);
 
-    const user = new User({
-        username,
-        password: hashedPass
-    });
 
-    const userObject = await user.save();
+    try {
+        if (password.length < 8) {
+            throw Error('Password should be at least 8 characters long.');
+        }
 
-    const token = generateToken({
-        userId: userObject._id,
-        username: userObject.username
-    });
+        if (!password.match(/^[A-Za-z0-9]+$/)) {
+            throw Error('Password should consist only with English letters and digits.');
+        }
 
-    res.cookie('aid', token);
+        const user = new User({
+            username,
+            password: hashedPass
+        });
 
-    return true;
+        const userObject = await user.save();
+
+        const token = generateToken({
+            userId: userObject._id,
+            username: userObject.username
+        });
+
+        res.cookie('aid', token);
+
+        return true;
+    } catch (err) {
+        return err;
+    }
 };
 
 const verifyUser = async (req, res) => {
@@ -47,18 +60,18 @@ const verifyUser = async (req, res) => {
     try {
         const userObject = await User.findOne({ username });
         const status = await bcrypt.compare(password, userObject.password);
-    
+
         if (status) {
             const token = generateToken({
                 userId: userObject._id,
                 username: userObject.username
             });
-    
+
             res.cookie('aid', token);
         }
-    
+
         return status;
-        
+
     } catch (error) {
         return false;
     }
@@ -80,7 +93,7 @@ const authAccessJSON = (req, res, next) => {
         jwt.verify(token, process.env.PRIVATE_KEY);
         next();
     } catch (err) {
-        return res.json({error: 'Not Authenticated!'});
+        return res.json({ error: 'Not Authenticated!' });
     }
 };
 

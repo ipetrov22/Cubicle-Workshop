@@ -21,6 +21,7 @@ mongoose.connect(config.dbUrl, {
     console.log('Database is setup.');
 });
 mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 require('./config/express')(app);
 
