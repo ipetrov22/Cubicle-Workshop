@@ -14,15 +14,16 @@ const saveUser = async (req, res) => {
         repeatPassword
     } = req.body;
 
-    if (password !== repeatPassword) {
-        return false;
-    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPass = await bcrypt.hash(password, salt);
 
 
     try {
+        if (password !== repeatPassword) {
+            throw Error('Passwords should match.');
+        }
+
         if (password.length < 8) {
             throw Error('Password should be at least 8 characters long.');
         }
