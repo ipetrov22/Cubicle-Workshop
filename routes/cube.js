@@ -7,9 +7,11 @@ const { authAccess, checkLoggedIn, checkIsCreator } = require('../controllers/us
 const router = Router();
 
 router.get('/create/cube', authAccess, checkLoggedIn, (req, res) => {
+    const error = req.query.error;
     res.render('createCube', {
         title: 'Create Cube Page',
-        isLoggedIn: req.isLoggedIn
+        isLoggedIn: req.isLoggedIn,
+        error
     });
 })
 
@@ -24,13 +26,12 @@ router.post('/create/cube', authAccess, async (req, res) => {
     const token = req.cookies['aid'];
     const decodedObj = jwt.verify(token, process.env.PRIVATE_KEY);
 
-    const cube = new Cube({ name, description, imageUrl, difficulty, creatorId: decodedObj.userId });
     try {
+    const cube = new Cube({ name, description, imageUrl, difficulty, creatorId: decodedObj.userId });
         await cube.save();
         res.redirect('/');
     } catch (err) {
-        console.log(err);
-        res.redirect('/create/cube');
+        res.redirect(`/create/cube?error=${err}`);
     }
 
 })

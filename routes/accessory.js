@@ -6,9 +6,11 @@ const { authAccess, checkLoggedIn } = require('../controllers/user');
 const router = Router();
 
 router.get('/create/accessory', authAccess, checkLoggedIn, (req, res) => {
+    const error = req.query.error;
     res.render('createAccessory', {
         title: 'Create Accessory',
-        isLoggedIn: req.isLoggedIn
+        isLoggedIn: req.isLoggedIn,
+        error
     });
 })
 
@@ -19,14 +21,13 @@ router.post('/create/accessory', authAccess, async (req, res) => {
         imageUrl
     } = req.body;
 
-    const accessory = new Accessory({ name, description, imageUrl })
-
     try {
+        const accessory = new Accessory({ name, description, imageUrl })
+
         await accessory.save();
         res.redirect('/');
     } catch (err) {
-        console.log(err);
-        res.redirect('/create/accessory');
+        res.redirect(`/create/accessory?error=${err}`);
     }
 })
 
